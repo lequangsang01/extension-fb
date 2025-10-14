@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Extension Demo</title>
+    <title>Facebook Friend Request Manager</title>
     <style>
         body {
-            width: 300px;
+            width: 350px;
             padding: 20px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1877f2 0%, #42a5f5 100%);
             color: white;
             margin: 0;
         }
@@ -24,12 +24,48 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
+        .section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            backdrop-filter: blur(10px);
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        
+        .input-group {
+            margin: 10px 0;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 12px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            background: white;
+        }
+        
         .button {
             background: rgba(255, 255, 255, 0.2);
             border: 2px solid rgba(255, 255, 255, 0.3);
             color: white;
             padding: 10px 20px;
-            margin: 10px 0;
+            margin: 5px 0;
             border-radius: 25px;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -44,51 +80,102 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .danger-button {
+            background: rgba(244, 67, 54, 0.8);
+            border-color: rgba(244, 67, 54, 0.9);
+        }
+        
+        .danger-button:hover {
+            background: rgba(244, 67, 54, 0.9);
+        }
+        
         .status {
             margin-top: 15px;
             padding: 10px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             font-size: 12px;
+            min-height: 20px;
         }
         
-        .input-group {
-            margin: 15px 0;
-        }
-        
-        input[type="text"] {
+        .progress-bar {
             width: 100%;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 15px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            font-size: 12px;
-            box-sizing: border-box;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
         }
         
-        input[type="text"]:focus {
-            outline: none;
-            background: white;
+        .progress-fill {
+            height: 100%;
+            background: rgba(76, 175, 80, 0.8);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+        
+        .warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid rgba(255, 193, 7, 0.5);
+            border-radius: 5px;
+            padding: 8px;
+            margin: 10px 0;
+            font-size: 11px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚀 Extension Demo</h1>
+        <h1>📱 Facebook Friend Manager</h1>
         
-        <div class="input-group">
-            <input type="text" id="messageInput" placeholder="Nhập tin nhắn...">
+        <div class="section">
+            <div class="section-title">🎯 Hủy Lời Mời Kết Bạn</div>
+            
+            <div class="warning">
+                ⚠️ Đảm bảo bạn đã đăng nhập Facebook và ở trang <br>
+                <strong>facebook.com/friends/requests</strong>
+            </div>
+            
+            <div class="input-group">
+                <input type="number" id="cancelCount" placeholder="Số lượng hủy" min="1" max="100" value="10">
+            </div>
+            
+            <button class="button danger-button" id="startCancel">🚫 Bắt Đầu Hủy</button>
+            <button class="button" id="stopCancel" disabled>⏹️ Dừng</button>
         </div>
         
-        <button class="button" id="sendMessage">Gửi tin nhắn</button>
-        <button class="button" id="changeColor">Đổi màu trang</button>
-        <button class="button" id="getPageInfo">Lấy thông tin trang</button>
-        <button class="button" id="saveData">Lưu dữ liệu</button>
-        <button class="button" id="loadData">Tải dữ liệu</button>
+        <div class="section">
+            <div class="section-title">📊 Tiến Độ</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="stats">
+                <span id="processed">Đã xử lý: 0</span>
+                <span id="remaining">Còn lại: 0</span>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">🔧 Tính Năng Khác</div>
+            <button class="button" id="goToRequests">🔗 Mở Trang Lời Mời</button>
+            <button class="button" id="refreshPage">🔄 Làm Mới Trang</button>
+        </div>
         
         <div class="status" id="status">
-            Sẵn sàng hoạt động!
+            Sẵn sàng hoạt động! Hãy mở trang lời mời kết bạn trước.
         </div>
     </div>
     

@@ -1,12 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "Extension Chrome Demo",
+  "name": "Facebook Friend Request Manager",
   "version": "1.0",
-  "description": "Một extension Chrome đơn giản để demo các tính năng cơ bản",
+  "description": "Extension để quản lý lời mời kết bạn Facebook - tự động hủy lời mời đã gửi",
   "permissions": [
     "activeTab",
     "storage",
-    "tabs"
+    "tabs",
+    "https://www.facebook.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -20,7 +21,13 @@
   },
   "content_scripts": [
     {
+      "matches": ["https://www.facebook.com/*"],
+      "js": ["facebook-content.js"],
+      "css": ["content.css"]
+    },
+    {
       "matches": ["<all_urls>"],
+      "exclude_matches": ["https://www.facebook.com/*"],
       "js": ["content.js"],
       "css": ["content.css"]
     }
