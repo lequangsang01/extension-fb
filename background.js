@@ -78,6 +78,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('Background nhận tin nhắn:', request);
     
     switch (request.action) {
+        case 'log':
+            // Xử lý log từ content script
+            console.log(`[${request.type?.toUpperCase()}] ${request.message}`);
+            
+            // Lưu log vào storage để popup có thể đọc
+            chrome.storage.local.get(['logs'], (result) => {
+                const logs = result.logs || [];
+                logs.push({
+                    timestamp: new Date().toISOString(),
+                    message: request.message,
+                    type: request.type || 'info'
+                });
+                
+                // Chỉ giữ 100 log gần nhất
+                if (logs.length > 100) {
+                    logs.splice(0, logs.length - 100);
+                }
+                
+                chrome.storage.local.set({ logs: logs });
+            });
+            
+            sendResponse({ success: true });
+            break;
+            
         case 'getUsageStats':
             chrome.storage.local.get(['extensionData'], (result) => {
                 sendResponse({
