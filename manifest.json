@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Extension Chrome Demo",
+  "version": "1.0",
+  "description": "Một extension Chrome đơn giản để demo các tính năng cơ bản",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Extension Demo",
+    "default_icon": {
+      "16": "image/image16.png",
+      "32": "image/image32.png",
+      "48": "image/image48.png",
+      "128": "image/image128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "image/image16.png",
+    "32": "image/image32.png",
+    "48": "image/image48.png",
+    "128": "image/image128.png"
+  }
+}

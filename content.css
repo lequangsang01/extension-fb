@@ -1,0 +1,80 @@
+/* content.css - CSS cho content script */
+.extension-highlight {
+    background-color: rgba(102, 126, 234, 0.3) !important;
+    border: 2px solid #667eea !important;
+    border-radius: 5px !important;
+    transition: all 0.3s ease !important;
+}
+
+.extension-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 16px !important;
+    border-radius: 20px !important;
+    cursor: pointer !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+}
+
+.extension-button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+}
+
+.extension-button:active {
+    transform: translateY(0) !important;
+}
+
+/* Hiệu ứng cho các element được tương tác */
+.extension-interactive {
+    transition: all 0.3s ease !important;
+}
+
+.extension-interactive:hover {
+    transform: scale(1.02) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Animation cho notification */
+@keyframes extensionSlideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes extensionSlideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+@keyframes extensionPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Style cho các element được highlight */
+.extension-highlighted {
+    animation: extensionPulse 0.6s ease-in-out !important;
+}
