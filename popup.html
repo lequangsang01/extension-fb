@@ -135,6 +135,54 @@
             margin: 10px 0;
             font-size: 11px;
         }
+        
+        .log-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 5px;
+            border-radius: 3px;
+            word-wrap: break-word;
+        }
+        
+        .log-entry.info {
+            background: rgba(33, 150, 243, 0.2);
+            color: #81d4fa;
+        }
+        
+        .log-entry.success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #a5d6a7;
+        }
+        
+        .log-entry.warning {
+            background: rgba(255, 193, 7, 0.2);
+            color: #fff59d;
+        }
+        
+        .log-entry.error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #ef9a9a;
+        }
+        
+        .log-entry.debug {
+            background: rgba(156, 39, 176, 0.2);
+            color: #ce93d8;
+        }
+        
+        .log-timestamp {
+            opacity: 0.7;
+            font-size: 10px;
+        }
     </style>
 </head>
 <body>
@@ -172,6 +220,14 @@
             <div class="section-title">🔧 Tính Năng Khác</div>
             <button class="button" id="goToRequests">🔗 Mở Trang Lời Mời</button>
             <button class="button" id="refreshPage">🔄 Làm Mới Trang</button>
+            <button class="button" id="clearLogs">🗑️ Xóa Log</button>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">📋 Log Hoạt Động</div>
+            <div class="log-container" id="logContainer">
+                <div class="log-entry info">Extension đã sẵn sàng!</div>
+            </div>
         </div>
         
         <div class="status" id="status">

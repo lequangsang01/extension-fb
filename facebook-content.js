@@ -6,6 +6,15 @@ let cancelCount = 0;
 let processedCount = 0;
 let cancelInterval = null;
 
+// Hàm gửi log về popup
+function sendLog(message, type = 'info') {
+    chrome.runtime.sendMessage({
+        action: 'log',
+        message: message,
+        type: type
+    });
+}
+
 // Các selector cho Facebook (có thể thay đổi theo thời gian)
 const SELECTORS = {
     // Selector cho nút "Xem lời mời đã gửi"
@@ -49,19 +58,26 @@ function isOnFriendRequestsPage() {
 
 // Hàm click vào tab "Xem lời mời đã gửi"
 function clickSentRequestsTab() {
+    sendLog('🔍 Đang tìm tab "Xem lời mời đã gửi"...', 'debug');
     const sentTab = findElement(SELECTORS.sentRequestsTab);
     if (sentTab) {
         sentTab.click();
+        sendLog('✅ Đã click vào tab "Xem lời mời đã gửi"', 'success');
         console.log('Đã click vào tab "Xem lời mời đã gửi"');
         return true;
+    } else {
+        sendLog('❌ Không tìm thấy tab "Xem lời mời đã gửi"', 'error');
+        return false;
     }
-    return false;
 }
 
 // Hàm tìm và click nút hủy lời mời
 function findAndCancelRequest() {
+    sendLog(`🔍 Đang tìm nút hủy lời mời... (${processedCount + 1}/${cancelCount})`, 'debug');
+    
     // Tìm tất cả nút hủy có thể
     const cancelButtons = findAllElements(SELECTORS.cancelButton);
+    sendLog(`📊 Tìm thấy ${cancelButtons.length} nút có thể`, 'debug');
     
     for (const button of cancelButtons) {
         const buttonText = button.textContent?.toLowerCase() || '';
@@ -71,11 +87,14 @@ function findAndCancelRequest() {
         if (buttonText.includes('hủy') || buttonText.includes('cancel') ||
             ariaLabel.includes('hủy') || ariaLabel.includes('cancel')) {
             
+            sendLog(`🎯 Tìm thấy nút hủy: "${buttonText || ariaLabel}"`, 'info');
+            
             // Scroll đến button để đảm bảo nó visible
             button.scrollIntoView({ behavior: 'smooth', block: 'center' });
             
             // Click button
             button.click();
+            sendLog(`✅ Đã click hủy lời mời: "${buttonText || ariaLabel}"`, 'success');
             console.log('Đã click hủy lời mời:', button.textContent || ariaLabel);
             
             // Highlight button để user thấy
@@ -86,6 +105,7 @@ function findAndCancelRequest() {
         }
     }
     
+    sendLog('❌ Không tìm thấy nút hủy lời mời nào', 'warning');
     return false;
 }
 
@@ -94,9 +114,12 @@ function cancelRequestsWithDelay(count) {
     processedCount = 0;
     cancelCount = count;
     
+    sendLog(`🚀 Bắt đầu hủy ${count} lời mời kết bạn...`, 'success');
+    
     const cancelNext = () => {
         if (!isCancelling || processedCount >= cancelCount) {
             if (isCancelling) {
+                sendLog(`✅ Hoàn thành! Đã hủy ${processedCount}/${cancelCount} lời mời`, 'success');
                 sendProgressUpdate(true);
             }
             return;
@@ -105,12 +128,16 @@ function cancelRequestsWithDelay(count) {
         // Tìm và click nút hủy
         if (findAndCancelRequest()) {
             processedCount++;
+            sendLog(`✅ Đã hủy lời mời ${processedCount}/${cancelCount}`, 'success');
             sendProgressUpdate(false);
             
             // Delay trước khi hủy tiếp
-            setTimeout(cancelNext, 2000 + Math.random() * 1000); // 2-3 giây
+            const delay = 2000 + Math.random() * 1000; // 2-3 giây
+            sendLog(`⏳ Chờ ${Math.round(delay/1000)}s trước khi tiếp tục...`, 'debug');
+            setTimeout(cancelNext, delay);
         } else {
             // Không tìm thấy nút hủy, thử scroll xuống
+            sendLog('📜 Scroll xuống để tìm thêm lời mời...', 'debug');
             window.scrollBy(0, 300);
             setTimeout(cancelNext, 1000);
         }
@@ -167,10 +194,12 @@ function createNotification(message, type = 'info') {
 // Lắng nghe tin nhắn từ popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('Nhận tin nhắn:', request);
+    sendLog(`📨 Nhận tin nhắn: ${request.action}`, 'debug');
     
     switch (request.action) {
         case 'startCancelRequests':
             if (!isOnFriendRequestsPage()) {
+                sendLog('❌ Không phải trang lời mời kết bạn Facebook', 'error');
                 createNotification('Vui lòng mở trang facebook.com/friends/requests trước!', 'error');
                 sendResponse({ success: false, error: 'Không phải trang lời mời kết bạn' });
                 return;
@@ -178,6 +207,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             
             isCancelling = true;
             cancelCount = request.count;
+            
+            sendLog(`🎯 Bắt đầu hủy ${request.count} lời mời kết bạn`, 'info');
             
             // Thử click vào tab "Xem lời mời đã gửi" trước
             setTimeout(() => {
@@ -200,6 +231,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 cancelInterval = null;
             }
             
+            sendLog(`⏹️ Đã dừng! Đã hủy ${processedCount}/${cancelCount} lời mời`, 'warning');
             createNotification(`Đã dừng! Đã hủy ${processedCount}/${cancelCount} lời mời.`);
             
             chrome.runtime.sendMessage({
@@ -213,6 +245,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             
         case 'checkPage':
             const isOnPage = isOnFriendRequestsPage();
+            sendLog(`🔍 Kiểm tra trang: ${isOnPage ? 'Đúng trang' : 'Sai trang'}`, 'debug');
             sendResponse({ 
                 success: true, 
                 isOnFriendRequestsPage: isOnPage,
@@ -221,6 +254,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             break;
             
         default:
+            sendLog(`❌ Action không được hỗ trợ: ${request.action}`, 'error');
             sendResponse({ success: false, error: 'Action không được hỗ trợ' });
     }
     
@@ -244,5 +278,8 @@ document.head.appendChild(style);
 // Kiểm tra trang khi load
 if (isOnFriendRequestsPage()) {
     console.log('Đã phát hiện trang lời mời kết bạn Facebook');
+    sendLog('✅ Đã phát hiện trang lời mời kết bạn Facebook', 'success');
     createNotification('Facebook Friend Request Manager đã sẵn sàng! 🎉');
+} else {
+    sendLog('ℹ️ Content script đã được tải nhưng chưa ở trang lời mời kết bạn', 'info');
 }
