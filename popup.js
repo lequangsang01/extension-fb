@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const processedSpan = document.getElementById('processed');
     const remainingSpan = document.getElementById('remaining');
     const logContainer = document.getElementById('logContainer');
+    const igStartBtn = document.getElementById('igStart');
+    const igStopBtn = document.getElementById('igStop');
+    const igUnfollowCountInput = document.getElementById('igUnfollowCount');
 
     let isRunning = false;
     let processedCount = 0;
@@ -125,6 +128,47 @@ document.addEventListener('DOMContentLoaded', function() {
         logContainer.innerHTML = '<div class="log-entry info">Log đã được xóa!</div>';
         logCount = 1;
         addLog('🗑️ Đã xóa tất cả log', 'info');
+    });
+
+    // Bắt đầu hủy follow Instagram
+    igStartBtn.addEventListener('click', async () => {
+        try {
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (!tab || !tab.url || !tab.url.includes('instagram.com')) {
+                addLog('❌ Không phải Instagram. Hãy mở instagram.com trước.', 'error');
+                updateStatus('❌ Hãy mở instagram.com trước.', true);
+                return;
+            }
+            const countVal = parseInt(igUnfollowCountInput.value);
+            const count = Number.isFinite(countVal) && countVal > 0 ? countVal : undefined;
+            igStartBtn.disabled = true;
+            igStopBtn.disabled = false;
+            addLog(`🚀 Bắt đầu hủy follow Instagram${count ? ` (${count})` : ' (tới hết)'}`, 'success');
+            await chrome.tabs.sendMessage(tab.id, {
+                action: 'startUnfollowInstagram',
+                count
+            });
+        } catch (e) {
+            addLog(`❌ Lỗi khi bắt đầu IG: ${e.message}`, 'error');
+        }
+    });
+
+    // Dừng hủy follow Instagram
+    igStopBtn.addEventListener('click', async () => {
+        try {
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (!tab || !tab.url || !tab.url.includes('instagram.com')) {
+                addLog('⚠️ Không ở Instagram.', 'warning');
+                return;
+            }
+            await chrome.tabs.sendMessage(tab.id, { action: 'stopUnfollowInstagram' });
+            addLog('⏹️ Đã yêu cầu dừng Instagram', 'warning');
+        } catch (e) {
+            addLog(`❌ Lỗi khi dừng IG: ${e.message}`, 'error');
+        } finally {
+            igStartBtn.disabled = false;
+            igStopBtn.disabled = true;
+        }
     });
 
     // Bắt đầu hủy lời mời
